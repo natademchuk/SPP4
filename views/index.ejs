@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>TODOLIST</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="png" sizes="32x32" href="/public/icons/notes32.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" media="screen" href="public/css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Knewave" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pattaya" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="/public/src/js.cookie.js"></script>
+</head>
+
+<body>
+    <div class="invsbl">
+        <a href="http://localhost:8000/login" class=" snwclr logout ">
+            <span class="glyphicon glyphicon-log-out"></span> Log out
+        </a>
+        <div class="Tittle">
+            <p>TO DO LIST</p>
+        </div>
+        <div class="Form_Container">
+            <form class="form-inline justify-content-center " id="taskForm" name="taskForm" action="" encType="multipart/form-data">
+                <input type="text" class="form-control fntsize" id="tskinput" name="task" placeholder="Your task.." required title="Task" autocomplete="off">
+                <select name="status" class="custom-select fntsize" id="sttsselect" required title="Task's status">
+                    <option value="Something to start">Something to start</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Finished">Finished</option>
+            </select>
+                <input type="date" name="fdate" id="dtinput" class="form-control fntsize" required title="Expected finish date">
+
+                <div class="custom-file fntsize" title="File">
+                    <input type="file" name="myFile" class="custom-file-input" id="customFile" required>
+                    <label class="custom-file-label" id="cstmlabel" for="customFile">Choose file</label>
+                </div>
+                <input type="submit" value="Submit" id=sbmt class="btn btnclrd fntsize" title="Submit">
+            </form>
+        </div>
+
+        <div class="Tasks" id="tskdiv">
+            <div class="srchinput">
+                <select name="status" id="srchSelect" class="custom-select fntsize" onchange="filterTasksByStatus
+                ()" title="Task's status">
+                    <option value="Something to start">Something to start</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Finished">Finished</option>
+            </select>
+            </div>
+            <table id="tasks_table" class="table  table-bordered fntsize">
+                <thead>
+                    <tr class="header">
+                        <td>Task</td>
+                        <td>Task's status</td>
+                        <td>Expected finish date</td>
+                        <td>File</td>
+                    </tr>
+                </thead>
+                <!-- <% if(utasks.length!=0) {%>-->
+                <tbody>
+                    <% for(var i=0; i<utasks.length;i++) { %>
+                        <tr class="tskinf">
+                            <td class="tskvalue">
+                                <%=utasks[i].task%>
+                            </td>
+                            <td class="sttsvalue">
+                                <%=utasks[i].status%>
+                            </td>
+                            <td class="dtvalue">
+                                <%=utasks[i].efdate %>
+                            </td>
+                            <td class="flvalue">
+                                <a class="snwclr" href=<%=utasks[i].filepath %>> <%=utasks[i].filename %></a>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+            <!--  <%}%>-->
+
+        </div>
+    </div>
+
+    <script src="/public/src/client.js"></script>
+    <script src="/public/src/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            let RowNumToUpd = false;
+
+            let socket = io.connect("http://localhost:8000");
+            let uploader = new SocketIOFileUpload(socket);
+            uploader.listenOnSubmit(document.getElementById("sbmt"), document.getElementById("customFile")); //listenOnSubmit(document.getElementById("sbmt"),
+            uploader.addEventListener("complete", function(event) {
+                console.log(event);
+                if (RowNumToUpd == false)
+                    socket.emit("add", {
+                        task: $("#tskinput").val(),
+                        status: $("#sttsselect").val(),
+                        fdate: $("#dtinput").val()
+                    });
+                else {
+                    socket.emit("update", {
+                        task: $("#tskinput").val(),
+                        status: $("#sttsselect").val(),
+                        fdate: $("#dtinput").val(),
+                        tasknum: RowNumToUpd - 1
+                    });
+                    document.getElementById("sbmt").value = "Submit";
+                }
+            });
+            //get 
+            $.ajax({
+                url: "/",
+                statusCode: {
+                    200: function() {
+                        //alert("200");
+                        $('.invsbl').css('visibility', 'visible');
+                    },
+                    401: function() {
+                        $(document).ready(function() {
+                            url = "http://localhost:8000/login";
+                            $(location).attr("href", url);
+                        });
+                    }
+                }
+            });
+            socket.on("add_success", (data) => {
+                let template = CreateTableRow(data.data);
+                $("table").append(template);
+            });
+            socket.on("update_success", (data) => {
+                $("table tr:eq(" + RowNumToUpd + ")").replaceWith(CreateTableRow(data.data));
+                RowNumToUpd = false;
+            });
+            // Нажатие на logout 
+            $(".logout").on("click", function() {
+                Cookies.remove('token');
+            });
+            // Загрузка названия файла в label
+            $(".custom-file-input").on("change", function() {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
+            //Двойное нажатие на строку таблицы
+            $(document).on('dblclick ', '.tskinf', function() {
+                let tskvalue = $(this).find('.tskvalue').text().replace(/\s+/g, " ").trim();
+                let cnfrmres = confirm("Update " + tskvalue + "?");
+
+                let item = [];
+                for (var i = 0; i < 4; i++) {
+                    item[i] = $(this).find("td:eq(" + i + ")").text().replace(/\s+/g, " ").trim();
+                }
+                item.push($(this).find(".snwclr").attr("href"));
+
+                if (cnfrmres === true) {
+                    RowNumToUpd = this.rowIndex;
+                    FillForm(item);
+                }
+            });
+            //Form submit
+            $("form").submit(function(e) {
+                e.preventDefault();
+            });
+            // Заполнение формы данными для обновления
+            function FillForm(RowInfo) {
+                document.getElementById("tskinput").value = RowInfo[0];
+                document.getElementById("sttsselect").value = RowInfo[1];
+                document.getElementById("dtinput").value = RowInfo[2];
+                document.getElementById("sbmt").value = "Update";
+            }
+            // Строка таблицы
+            function CreateTableRow(res) {
+                return `<tr class="tskinf">
+            <td class="tskvalue">
+              ${res.task}
+            </td>
+            <td class="sttsvalue">
+              ${res.status}
+            </td>
+            <td class="dtvalue">
+              ${res.efdate} 
+            </td>
+            <td class="flvalue">
+              <a class="snwclr" href=${res.filepath}> ${res.filename}</a>
+             </td>
+            </tr>`;
+            }
+            // Selected filter
+            function filterTasksByStatus() {
+                let input, filter, table, tr, td, i, txtValue;
+                input = document.getElementById("srchSelect");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("tasks_table");
+                tr = table.getElementsByTagName("tr");
+                for (i = 1; i < tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[1];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+        }, false);
+    </script>
+</body>
+
+</html>

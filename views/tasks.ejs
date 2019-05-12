@@ -1,0 +1,38 @@
+<% if(taskAdded) {%>
+    <div class="srchinput">
+        <select name="status" id="srchSelect" class="custom-select fntsize" onchange="filterTasksByStatus
+        ()" title="Task's status">
+            <option value="Something to start">Something to start</option>
+            <option value="In progress">In progress</option>
+            <option value="Finished">Finished</option>
+    </select>
+        <!--<input type="text" id="myInput" class="form-control fntsize" onkeyup="filterTasksByStatus
+            ()" placeholder="Search for task's status.." title="Task's status">-->
+    </div>
+    <table id="tasks_table" class="table  table-bordered fntsize">
+        <thead>
+            <tr class="header">
+                <td>Task</td>
+                <td>Task's status</td>
+                <td>Expected finish date</td>
+                <td>File</td>
+            </tr>
+        </thead>
+        <% for(var i=0; i<taskInfo.length;i++) { %>
+            <tr class="tskinf">
+                <td class="tskvalue">
+                    <%=taskInfo[i].task%>
+                </td>
+                <td class="sttsvalue">
+                    <%=taskInfo[i].status%>
+                </td>
+                <td class="dtvalue">
+                    <%=taskInfo[i].efdate %>
+                </td>
+                <td class="flvalue">
+                    <a class="snwclr" href=<%=taskInfo[i].filepath %>> <%=taskInfo[i].filename %></a>
+                </td>
+            </tr>
+            <% } %>
+    </table>
+    <%}%>

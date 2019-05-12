@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>
+        <%=title %>
+            TODOLIST
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="png" sizes="32x32" href="/public/icons/notes32.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" media="screen" href="public/css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Knewave" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pattaya" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="public/css/loginstyle.css">
+</head>
+
+<body>
+    <div class="invsbl">
+        <div class="Tittle">
+            <p>TO DO LIST</p>
+        </div>
+        <div class="Login_Container">
+            <form class="form-login" name="loginForm" encType="multipart/form-data">
+                <h4 class="header">
+                    <%=header%>
+                </h4>
+                <input type="text" name="uName" id="userName" class="form-control fntsize" placeholder="Username" required title="Username" autocomplete="off" />
+                </br>
+                <input type="password" name="uPassword" id="userPassword" class="form-control fntsize" placeholder="Password" required title="Password" autocomplete="off" />
+                </br>
+                <div class="wrapper">
+                    <div>
+                        <input type="submit" id=sbmt class="btn btnclrd fntsize" value=<%=action %>>
+                    </div>
+                    <% if(action=="Login"){ %>
+                        <div class="smref">
+                            <p>Not registered?<a href="http://localhost:8000/register" class="snwclr"> Create an account</a></p>
+                        </div>
+                        <%} else{ %>
+                            <div class="smref">
+                                <p>Already registered?<a href="http://localhost:8000/login" class="snwclr"> Login to account</a></p>
+                            </div>
+                            <%} %>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/public/src/socket.io.js"></script>
+    <script src="/public/src/js.cookie.js"></script>
+    <script>
+        let socket;
+        //get 
+        $.ajax({
+            url: "/",
+            statusCode: {
+                200: function() {
+                    $(document).ready(function() {
+                        url = "http://localhost:8000";
+                        $(location).attr("href", url);
+                    });
+                },
+                401: function() {
+                    $('.invsbl').css('visibility', 'visible');
+                    if ($("#sbmt").val() == "Login")
+                        ConnectServer("login");
+                    else
+                        ConnectServer("register");
+                }
+            }
+        });
+
+        function ConnectServer(route) {
+            socket = io.connect('http://localhost:8000/' + route);
+        }
+
+        $("form").submit(function(e) {
+            e.preventDefault();
+            if ($("#sbmt").val() == "Login")
+                Autorisation("login");
+            else
+                Autorisation("register");
+
+        });
+
+        function Autorisation(route) {
+
+            // let formData = new FormData(document.forms.loginForm);
+            socket.emit(route, {
+                uName: $("#userName").val(),
+                uPassword: $("#userPassword").val()
+            });
+
+            socket.on("succss", (data) => {
+                Cookies.set('token', data.token);
+                url = "http://localhost:8000";
+                $(location).attr("href", url);
+            });
+            socket.on("err", (data) => {
+                alert(data.msg);
+            });
+
+            /*$.ajax({
+                url: route,
+                contentType: false,
+                processData: false,
+                method: "POST",
+                data: formData,
+                statusCode: {
+                    200: function() {
+                        $(document).ready(function() {
+                            url = "http://localhost:8000";
+                            $(location).attr("href", url);
+                        });
+
+                    },
+                    400: function() {
+
+                    },
+                    401: function() {
+                        alert("Your username and password do not match.");
+
+                    },
+                    404: function() {
+                        alert("Your username does not exist.");
+
+                    },
+                    409: function() {
+                        alert("Your username already exists.");
+
+                    }
+                }
+            });*/
+        }
+    </script>
+</body>

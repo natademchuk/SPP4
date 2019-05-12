@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    font-size: 1.7vw!important;
+    /*  background-image: linear-gradient(to top left, rgb(108, 137, 209), rgb(250, 137, 137));*/
+    background-image: linear-gradient(to top left, rgba(108, 137, 209, 0.9), rgba(250, 137, 137, 0.3));
+}
+
+.invsbl {
+    visibility: hidden;
+}
+
+.logout {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    font-family: 'Pattaya';
+    font-style: normal!important;
+}
+
+div.Tittle {
+    margin-top: 0.1em;
+    text-align-last: center;
+    font-family: 'Knewave', cursive;
+    font-size: 3em;
+    color: snow;
+}
+
+.srchinput {
+    margin-bottom: 1em;
+    color: #495057;
+}
+
+.Tasks {
+    margin-left: 9em;
+    margin-right: 9em;
+}
+
+.Form_Container {
+    margin: 4em;
+    margin-left: 6em;
+    margin-right: 6em;
+}
+
+.custom-file {
+    width: auto!important;
+}
+
+@media only screen and (max-width: 575px) {
+    .custom-file {
+        width: 100%!important;
+    }
+}
+
+.fntsize {
+    font-size: 0.8em;
+    /*font-family: 'Pattaya';*/
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+
+.btn {
+    height: calc(1.5em + .75rem + 2px);
+}
+
+.btnclrd {
+    border: 1px solid #ced4da;
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.btnclrd:hover {
+    border-color: #929fba;
+    /*background-color: #b1bace;*/
+    color: #495057;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+}
+
+.table {
+    color: snow;
+}
+
+tr:hover {
+    background-color: rgba(121, 85, 72, 0.1);
+}
+
+a.snwclr {
+    color: snow;
+    font-style: oblique;
+}
+
+tr.header {
+    font-size: 1.3em;
+    font-style: normal;
+    font-family: 'Pattaya';
+    /*font-family: 'Open Sans Condensed Bold', sans-serif;*/
+    text-align: center;
+    background-color: rgba(121, 85, 72, 0.3);
+}
+
+tr.tskinf {
+    font-family: 'Open Sans Condensed Bold', sans-serif;
+}
